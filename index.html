@@ -3,1239 +3,488 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HomeGrown Grant Hub</title>
+<title>HomeGrown Hub</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Nunito:wght@300;400;600;700&family=DM+Mono:wght@400;500&display=swap');
-
-:root {
-  --sunset-deep:   #1a0a14;
-  --sunset-night:  #2d1230;
-  --coral:         #f4694b;
-  --coral-lt:      #fad4cb;
-  --peach:         #f9a27a;
-  --blush:         #f7c5a8;
-  --rose:          #e8506a;
-  --rose-lt:       #fce8ec;
-  --amber:         #f5a623;
-  --amber-lt:      #fef0d4;
-  --lavender:      #c084b8;
-  --sky:           #f7e8f0;
-  --cream:         #fff8f4;
-  --ink:           #1a0a14;
-  --muted:         #9a6e7a;
-  --rule:          #f0ddd8;
-  --white:         #ffffff;
-
-  --grad-sky: linear-gradient(135deg, #ff9a6c 0%, #f7667d 35%, #c0608e 65%, #7b4fa6 100%);
-  --grad-card: linear-gradient(135deg, #fff0ec 0%, #fde8f0 100%);
-  --grad-dark: linear-gradient(160deg, #2d1230 0%, #1a0a14 50%, #0f0a18 100%);
-}
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-html { scroll-behavior: smooth; }
-
-body {
-  font-family: 'Nunito', sans-serif;
-  background: var(--cream);
-  color: var(--ink);
-  line-height: 1.6;
-  min-height: 100vh;
-}
-
-/* ═══════════════════════════════════
-   PASSWORD SCREEN
-═══════════════════════════════════ */
-#lock-screen {
-  position: fixed;
-  inset: 0;
-  background: var(--grad-dark);
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 0;
-}
-
-.lock-glow {
-  position: absolute;
-  width: 600px;
-  height: 600px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(244,105,75,0.18) 0%, transparent 70%);
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-}
-
-.lock-card {
-  position: relative;
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 24px;
-  padding: 48px 44px 40px;
-  width: min(420px, 90vw);
-  text-align: center;
-}
-
-.lock-icon {
-  font-size: 40px;
-  margin-bottom: 16px;
-  display: block;
-}
-
-.lock-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 28px;
-  color: var(--white);
-  margin-bottom: 6px;
-  font-weight: 400;
-}
-
-.lock-sub {
-  font-size: 13px;
-  color: rgba(255,255,255,0.45);
-  margin-bottom: 32px;
-  letter-spacing: 0.03em;
-}
-
-.lock-input-wrap {
-  position: relative;
-  margin-bottom: 16px;
-}
-
-.lock-input {
-  width: 100%;
-  padding: 16px 52px 16px 20px;
-  background: rgba(255,255,255,0.08);
-  border: 1.5px solid rgba(255,255,255,0.15);
-  border-radius: 12px;
-  color: var(--white);
-  font-family: 'DM Mono', monospace;
-  font-size: 18px;
-  letter-spacing: 0.3em;
-  text-align: center;
-  outline: none;
-  transition: border-color 0.2s;
-}
-.lock-input::placeholder { letter-spacing: 0.15em; color: rgba(255,255,255,0.25); font-size: 14px; }
-.lock-input:focus { border-color: var(--coral); }
-
-.lock-toggle {
-  position: absolute;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  color: rgba(255,255,255,0.4);
-  cursor: pointer;
-  font-size: 16px;
-  padding: 4px;
-}
-.lock-toggle:hover { color: rgba(255,255,255,0.8); }
-
-.lock-btn {
-  width: 100%;
-  padding: 16px;
-  background: var(--grad-sky);
-  border: none;
-  border-radius: 12px;
-  color: var(--white);
-  font-family: 'Nunito', sans-serif;
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  letter-spacing: 0.04em;
-  transition: opacity 0.2s, transform 0.15s;
-  box-shadow: 0 8px 24px rgba(244,105,75,0.35);
-}
-.lock-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-.lock-btn:active { transform: translateY(0); }
-
-.lock-error {
-  margin-top: 14px;
-  font-size: 13px;
-  color: var(--coral);
-  min-height: 20px;
-  transition: opacity 0.2s;
-}
-
-.lock-hint {
-  margin-top: 24px;
-  font-size: 11px;
-  color: rgba(255,255,255,0.2);
-  font-family: 'DM Mono', monospace;
-}
-
-/* shake animation */
-@keyframes shake {
-  0%,100%{transform:translateX(0)}
-  20%{transform:translateX(-8px)}
-  40%{transform:translateX(8px)}
-  60%{transform:translateX(-6px)}
-  80%{transform:translateX(6px)}
-}
-.shake { animation: shake 0.4s ease; }
-
-/* ═══════════════════════════════════
-   MAIN CONTENT (hidden until unlocked)
-═══════════════════════════════════ */
-#app { display: none; }
-
-/* ═══════════════════════════════════
-   HEADER / HERO
-═══════════════════════════════════ */
-header {
-  background: var(--grad-dark);
-  color: var(--white);
-  padding: 0;
-  position: relative;
-  overflow: hidden;
-}
-
-.header-sunset {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 80% 60% at 80% 110%, rgba(244,105,75,0.4) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 80% at 20% 120%, rgba(232,80,106,0.3) 0%, transparent 55%),
-    radial-gradient(ellipse 100% 40% at 50% 130%, rgba(245,166,35,0.25) 0%, transparent 50%);
-  pointer-events: none;
-}
-
-.header-grid {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-  background-size: 40px 40px;
-  pointer-events: none;
-}
-
-.header-inner {
-  position: relative;
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 56px 40px 48px;
-}
-
-.eyebrow {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--peach);
-  margin-bottom: 14px;
-  opacity: 0.8;
-}
-
-h1 {
-  font-family: 'Playfair Display', serif;
-  font-size: clamp(34px, 6vw, 58px);
-  line-height: 1.08;
-  font-weight: 400;
-  margin-bottom: 18px;
-  color: var(--white);
-}
-h1 em {
-  font-style: italic;
-  background: var(--grad-sky);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.header-desc {
-  font-size: 15px;
-  color: rgba(255,255,255,0.5);
-  max-width: 520px;
-  margin-bottom: 32px;
-  line-height: 1.7;
-}
-
-.header-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.hpill {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 100px;
-  padding: 8px 16px;
-  font-size: 12px;
-  color: rgba(255,255,255,0.7);
-}
-.hpill strong {
-  color: var(--peach);
-  font-weight: 700;
-}
-.hpill-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--grad-sky);
-  flex-shrink: 0;
-}
-
-/* ═══════════════════════════════════
-   LAYOUT
-═══════════════════════════════════ */
-main {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 48px 24px 100px;
-}
-
-section { margin-bottom: 60px; }
-
-.section-label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 20px;
-}
-.section-label::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, var(--rule), transparent);
-}
-.section-label-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--grad-sky);
-  flex-shrink: 0;
-}
-
-h2 {
-  font-family: 'Playfair Display', serif;
-  font-size: 28px;
-  font-weight: 400;
-  color: var(--ink);
-  margin-bottom: 20px;
-}
-
-/* ═══════════════════════════════════
-   GRANT SUMMARY
-═══════════════════════════════════ */
-.grant-card {
-  background: var(--grad-dark);
-  border-radius: 20px;
-  padding: 36px 40px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 28px;
-  position: relative;
-  overflow: hidden;
-}
-.grant-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 70% 80% at 90% 100%, rgba(244,105,75,0.25) 0%, transparent 55%),
-    radial-gradient(ellipse 50% 60% at 10% 0%, rgba(192,96,142,0.2) 0%, transparent 50%);
-  pointer-events: none;
-}
-.grant-stat { position: relative; }
-.grant-stat .gs-label {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.35);
-  margin-bottom: 8px;
-}
-.grant-stat .gs-value {
-  font-family: 'Playfair Display', serif;
-  font-size: 30px;
-  font-style: italic;
-  background: var(--grad-sky);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  line-height: 1.1;
-}
-.grant-stat .gs-sub {
-  font-size: 11px;
-  color: rgba(255,255,255,0.3);
-  margin-top: 4px;
-}
-
-/* ═══════════════════════════════════
-   CHECKLIST
-═══════════════════════════════════ */
-.progress-wrap {
-  background: var(--rule);
-  border-radius: 100px;
-  height: 6px;
-  margin-bottom: 24px;
-  overflow: hidden;
-}
-.progress-fill {
-  height: 100%;
-  background: var(--grad-sky);
-  border-radius: 100px;
-  width: 0%;
-  transition: width 0.5s cubic-bezier(.4,0,.2,1);
-}
-.progress-meta {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 8px;
-  font-size: 12px;
-  color: var(--muted);
-  font-family: 'DM Mono', monospace;
-}
-
-.checklist { display: flex; flex-direction: column; gap: 10px; }
-
-.check-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  background: var(--white);
-  border: 1.5px solid var(--rule);
-  border-radius: 14px;
-  padding: 18px 20px;
-  cursor: pointer;
-  transition: border-color 0.2s, background 0.2s, transform 0.15s, box-shadow 0.2s;
-  position: relative;
-  overflow: hidden;
-}
-.check-item::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 3px;
-  background: var(--grad-sky);
-  opacity: 0;
-  transition: opacity 0.2s;
-  border-radius: 3px 0 0 3px;
-}
-.check-item:hover {
-  border-color: var(--blush);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(244,105,75,0.1);
-}
-.check-item:hover::before { opacity: 1; }
-.check-item.done {
-  background: linear-gradient(135deg, #fff8f5 0%, #ffeef4 100%);
-  border-color: var(--coral-lt);
-}
-.check-item.done::before { opacity: 1; }
-
-.check-box {
-  width: 24px; height: 24px;
-  border-radius: 8px;
-  border: 2px solid var(--rule);
-  flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  margin-top: 1px;
-  transition: all 0.2s;
-  background: var(--white);
-}
-.check-item:hover .check-box { border-color: var(--coral); }
-.check-item.done .check-box {
-  background: var(--grad-sky);
-  border-color: transparent;
-}
-.check-box .ck { display: none; color: white; font-size: 13px; }
-.check-item.done .check-box .ck { display: block; }
-
-.check-body { flex: 1; min-width: 0; }
-.check-title {
-  font-weight: 700;
-  font-size: 14px;
-  color: var(--ink);
-  margin-bottom: 4px;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.check-item.done .check-title {
-  color: var(--coral);
-  text-decoration: line-through;
-  text-decoration-color: var(--blush);
-}
-.check-desc {
-  font-size: 13px;
-  color: var(--muted);
-  line-height: 1.6;
-}
-.check-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 10px;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--coral);
-  text-decoration: none;
-  font-family: 'DM Mono', monospace;
-  letter-spacing: 0.02em;
-  transition: color 0.15s;
-}
-.check-link:hover { color: var(--rose); }
-
-.badge {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  padding: 3px 9px;
-  border-radius: 100px;
-  font-weight: 500;
-}
-.badge-now { background: var(--coral-lt); color: var(--coral); }
-.badge-req { background: var(--amber-lt); color: #9a6a10; }
-.badge-key { background: #fce8ec; color: var(--rose); }
-
-/* ═══════════════════════════════════
-   APPLICATION LINKS
-═══════════════════════════════════ */
-.links-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 12px;
-}
-.link-card {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  background: var(--white);
-  border: 1.5px solid var(--rule);
-  border-radius: 14px;
-  padding: 20px;
-  text-decoration: none;
-  color: var(--ink);
-  transition: all 0.2s;
-  position: relative;
-  overflow: hidden;
-}
-.link-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--grad-sky);
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-.link-card:hover {
-  border-color: var(--blush);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(244,105,75,0.12);
-}
-.lc-label {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.lc-name {
-  font-weight: 700;
-  font-size: 14px;
-  color: var(--ink);
-  margin-top: 2px;
-}
-.lc-desc {
-  font-size: 12px;
-  color: var(--muted);
-  line-height: 1.5;
-  margin-top: 2px;
-}
-.lc-arrow {
-  font-size: 20px;
-  background: var(--grad-sky);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-top: auto;
-  align-self: flex-end;
-  padding-top: 10px;
-}
-
-/* ═══════════════════════════════════
-   LISTINGS
-═══════════════════════════════════ */
-.listings-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 14px;
-  margin-bottom: 20px;
-}
-.listings-header h2 { margin-bottom: 0; }
-
-.open-all-btn {
-  font-family: 'Nunito', sans-serif;
-  font-size: 13px;
-  font-weight: 700;
-  background: var(--grad-sky);
-  color: var(--white);
-  border: none;
-  border-radius: 100px;
-  padding: 11px 22px;
-  cursor: pointer;
-  letter-spacing: 0.02em;
-  transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
-  box-shadow: 0 4px 16px rgba(244,105,75,0.3);
-}
-.open-all-btn:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(244,105,75,0.4); }
-
-.zone-note {
-  display: flex;
-  gap: 14px;
-  align-items: flex-start;
-  background: linear-gradient(135deg, #fff4f0, #ffeef4);
-  border: 1.5px solid var(--coral-lt);
-  border-radius: 14px;
-  padding: 16px 20px;
-  font-size: 13px;
-  color: #7a3030;
-  margin-bottom: 20px;
-  line-height: 1.6;
-}
-.zone-icon { font-size: 20px; flex-shrink: 0; }
-
-/* Search source banner */
-.search-banner {
-  background: var(--grad-dark);
-  border-radius: 20px;
-  padding: 28px 32px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  gap: 20px;
-  margin-bottom: 24px;
-  position: relative;
-  overflow: hidden;
-}
-.search-banner::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse 80% 100% at 100% 100%, rgba(244,105,75,0.2) 0%, transparent 60%);
-  pointer-events: none;
-}
-.sb-item { position: relative; }
-.sb-label {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.3);
-  margin-bottom: 6px;
-}
-.sb-item a {
-  font-weight: 700;
-  font-size: 13px;
-  text-decoration: none;
-  background: var(--grad-sky);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  transition: opacity 0.15s;
-}
-.sb-item a:hover { opacity: 0.8; }
-.sb-desc {
-  font-size: 11px;
-  color: rgba(255,255,255,0.3);
-  margin-top: 3px;
-  line-height: 1.4;
-}
-
-/* Listing cards */
-.listings-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 14px;
-}
-
-.listing-card {
-  background: var(--white);
-  border: 1.5px solid var(--rule);
-  border-radius: 16px;
-  overflow: hidden;
-  transition: all 0.2s;
-}
-.listing-card:hover {
-  border-color: var(--blush);
-  transform: translateY(-3px);
-  box-shadow: 0 12px 32px rgba(244,105,75,0.12);
-}
-.listing-card a { text-decoration: none; color: inherit; display: block; }
-
-.listing-thumb {
-  width: 100%;
-  height: 130px;
-  background: var(--grad-dark);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 36px;
-  position: relative;
-  overflow: hidden;
-}
-.listing-thumb::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse 80% 80% at 80% 100%, rgba(244,105,75,0.3) 0%, transparent 60%);
-}
-
-.listing-body { padding: 16px 18px; }
-.listing-price {
-  font-family: 'Playfair Display', serif;
-  font-size: 22px;
-  font-style: italic;
-  background: var(--grad-sky);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.listing-addr {
-  font-size: 13px;
-  color: var(--ink);
-  font-weight: 600;
-  margin: 4px 0 8px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.listing-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-}
-.ltag {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  padding: 3px 9px;
-  border-radius: 100px;
-  background: var(--cream);
-  color: var(--muted);
-  border: 1px solid var(--rule);
-}
-.ltag-zone { background: #fff0ec; color: var(--coral); border-color: var(--coral-lt); }
-.listing-source {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  color: var(--muted);
-  margin-top: 10px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.listings-note {
-  margin-top: 20px;
-  padding: 16px 20px;
-  background: linear-gradient(135deg, #fff8f5, #fff0f8);
-  border: 1.5px solid var(--rule);
-  border-radius: 12px;
-  font-size: 12px;
-  color: var(--muted);
-  font-family: 'DM Mono', monospace;
-  line-height: 1.7;
-}
-
-/* ═══════════════════════════════════
-   FOOTER
-═══════════════════════════════════ */
-footer {
-  background: var(--grad-dark);
-  text-align: center;
-  padding: 36px 24px;
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
-  color: rgba(255,255,255,0.25);
-  letter-spacing: 0.06em;
-  position: relative;
-  overflow: hidden;
-}
-footer::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 1px;
-  background: var(--grad-sky);
-  opacity: 0.3;
-}
-footer a { color: var(--peach); text-decoration: none; opacity: 0.7; }
-footer a:hover { opacity: 1; }
-
-/* ═══════════════════════════════════
-   RESPONSIVE
-═══════════════════════════════════ */
-@media (max-width: 600px) {
-  .header-inner { padding: 36px 20px 36px; }
-  main { padding: 32px 16px 60px; }
-  .grant-card { padding: 24px 22px; }
-  .search-banner { padding: 22px 20px; }
-}
-
-/* ═══════════════════════════════════
-   FADE IN ANIMATION
-═══════════════════════════════════ */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-#app { animation: fadeUp 0.5s ease both; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#fff8f4;-webkit-tap-highlight-color:transparent}
+input,select{-webkit-appearance:none;appearance:none}
+a,button{-webkit-tap-highlight-color:transparent}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px)}40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+@keyframes slideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
-
-<!-- ═══════════════════ LOCK SCREEN ═══════════════════ -->
-<div id="lock-screen">
-  <div class="lock-glow"></div>
-  <div class="lock-card">
-    <span class="lock-icon">🌅</span>
-    <div class="lock-title">HomeGrown Hub</div>
-    <div class="lock-sub">Your private grant & listings dashboard</div>
-    <div class="lock-input-wrap">
-      <input
-        class="lock-input"
-        id="pw-input"
-        type="password"
-        placeholder="Enter password"
-        autocomplete="off"
-        onkeydown="if(event.key==='Enter')unlock()"
-      />
-      <button class="lock-toggle" onclick="togglePw()" id="pw-eye" title="Show/hide password">👁</button>
-    </div>
-    <button class="lock-btn" onclick="unlock()">Unlock Dashboard</button>
-    <div class="lock-error" id="lock-error"></div>
-    <div class="lock-hint">protected · sunset edition</div>
-  </div>
-</div>
-
-<!-- ═══════════════════ MAIN APP ═══════════════════ -->
-<div id="app">
-
-<header>
-  <div class="header-sunset"></div>
-  <div class="header-grid"></div>
-  <div class="header-inner">
-    <div class="eyebrow">City of Chicago · HomeGrown Purchase Assistance · 2026</div>
-    <h1>Your path to<br><em>owning in Chicago</em></h1>
-    <p class="header-desc">A personalized dashboard for your $40,000 Zone A grant — tracking every step from eligibility to keys in hand.</p>
-    <div class="header-pills">
-      <div class="hpill"><span class="hpill-dot"></span> Grant: <strong>$40,000</strong></div>
-      <div class="hpill"><span class="hpill-dot"></span> Budget: <strong>$180k – $235k</strong></div>
-      <div class="hpill"><span class="hpill-dot"></span> Zone: <strong>A</strong></div>
-      <div class="hpill"><span class="hpill-dot"></span> <strong>Bronzeville · South Loop</strong></div>
-    </div>
-  </div>
-</header>
-
-<main>
-
-  <!-- GRANT SNAPSHOT -->
-  <section>
-    <div class="section-label"><span class="section-label-dot"></span>Your grant snapshot</div>
-    <div class="grant-card">
-      <div class="grant-stat">
-        <div class="gs-label">Zone A Grant</div>
-        <div class="gs-value">$40,000</div>
-        <div class="gs-sub">101–120% AMI bracket</div>
-      </div>
-      <div class="grant-stat">
-        <div class="gs-label">Target Price</div>
-        <div class="gs-value">≤$230k</div>
-        <div class="gs-sub">Grant = 17.4% — within 25% cap ✓</div>
-      </div>
-      <div class="grant-stat">
-        <div class="gs-label">Est. Mortgage</div>
-        <div class="gs-value">~$188k</div>
-        <div class="gs-sub">≈$1,260/mo P&amp;I @ 6.75%</div>
-      </div>
-      <div class="grant-stat">
-        <div class="gs-label">Your 1% Min.</div>
-        <div class="gs-value">$2,300</div>
-        <div class="gs-sub">Required personal funds</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CHECKLIST -->
-  <section>
-    <div class="section-label"><span class="section-label-dot"></span>Qualification checklist</div>
-    <div class="progress-meta">
-      <span>Your progress</span>
-      <span id="progress-text">0 of 8 complete</span>
-    </div>
-    <div class="progress-wrap">
-      <div class="progress-fill" id="progress-bar"></div>
-    </div>
-    <h2>Steps to qualify</h2>
-
-    <div class="checklist" id="checklist">
-
-      <div class="check-item" onclick="toggleCheck(this)">
-        <div class="check-box"><span class="ck">✓</span></div>
-        <div class="check-body">
-          <div class="check-title">Confirm income eligibility <span class="badge badge-now">Do first</span></div>
-          <div class="check-desc">Your $95k income (~112% AMI) earns you a <strong>$40,000 Zone A grant</strong>. Household income includes all adults 18+. Max to qualify at all: 150% AMI ($127,650 for single).</div>
-        </div>
-      </div>
-
-      <div class="check-item" onclick="toggleCheck(this)">
-        <div class="check-box"><span class="ck">✓</span></div>
-        <div class="check-body">
-          <div class="check-title">Complete HUD-certified homebuyer education <span class="badge badge-req">Required</span></div>
-          <div class="check-desc">Must be done before applying. Look for NHS Chicago or HUD-approved counselors. You'll receive a certificate needed for the application.</div>
-          <a class="check-link" href="https://www.hud.gov/program_offices/housing/sfh/hcc/hcs.cfm" target="_blank">→ Find HUD counselors near Chicago</a>
-        </div>
-      </div>
-
-      <div class="check-item" onclick="toggleCheck(this)">
-        <div class="check-box"><span class="ck">✓</span></div>
-        <div class="check-body">
-          <div class="check-title">Get mortgage pre-approval <span class="badge badge-req">Required</span></div>
-          <div class="check-desc">A pre-approval letter is required to apply. At $95k, you should qualify for ~$188k comfortably. TRP Lending works directly with HomeGrown applicants.</div>
-          <a class="check-link" href="tel:+13126661323">→ TRP Lending: (312) 666-1323</a>
-        </div>
-      </div>
-
-      <div class="check-item" onclick="toggleCheck(this)">
-        <div class="check-box"><span class="ck">✓</span></div>
-        <div class="check-body">
-          <div class="check-title">Gather income documents <span class="badge badge-req">Required</span></div>
-          <div class="check-desc">Collect for all household adults 18+: last 3 pay stubs · 2 years federal tax returns + all schedules · 2 years W-2s · Social Security / pension year-end statements if applicable.</div>
-        </div>
-      </div>
-
-      <div class="check-item" onclick="toggleCheck(this)">
-        <div class="check-box"><span class="ck">✓</span></div>
-        <div class="check-body">
-          <div class="check-title">Find a property &amp; verify Zone A status <span class="badge badge-key">Critical</span></div>
-          <div class="check-desc">Eligible types: condo, single-family, townhome, 2-flat. No ground-up new construction. Run every address through the city's Zone Lookup Tool before making an offer.</div>
-          <a class="check-link" href="https://chicago.maps.arcgis.com/apps/instant/lookup/index.html?appid=f7b2382970c2412686a7dcab6a9c908c" target="_blank">→ Open Zone A/B Lookup Tool</a>
-        </div>
-      </div>
-
-      <div class="check-item" onclick="toggleCheck(this)">
-        <div class="check-box"><span class="ck">✓</span></div>
-        <div class="check-body">
-          <div class="check-title">Sign a purchase contract</div>
-          <div class="check-desc">You'll need a fully executed purchase contract to submit. Your $40k grant stays within the 25% cap at any price between $180k–$235k. Must plan to occupy for at least 5 years.</div>
-        </div>
-      </div>
-
-      <div class="check-item" onclick="toggleCheck(this)">
-        <div class="check-box"><span class="ck">✓</span></div>
-        <div class="check-body">
-          <div class="check-title">Submit your application — act fast <span class="badge badge-now">First-come basis</span></div>
-          <div class="check-desc">$21M total fund for ~300–400 buyers. Applications opened June 8, 2026. Apply through TRP Lending or Neighborhood Lending Services. Have every document ready before submitting.</div>
-          <a class="check-link" href="https://resurrectionproject.tfaforms.net/f/homegrown" target="_blank">→ Apply via The Resurrection Project</a>&nbsp;&nbsp;
-          <a class="check-link" href="https://www.chicago.gov/homegrown" target="_blank">→ chicago.gov/homegrown</a>
-        </div>
-      </div>
-
-      <div class="check-item" onclick="toggleCheck(this)">
-        <div class="check-box"><span class="ck">✓</span></div>
-        <div class="check-body">
-          <div class="check-title">Have $2,300 personal contribution ready <span class="badge badge-req">Required</span></div>
-          <div class="check-desc">At a $230k purchase price, you must contribute at least 1% ($2,300) from your own personal funds — not a gift or secondary loan. Required in addition to the grant.</div>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- APPLICATION LINKS -->
-  <section>
-    <div class="section-label"><span class="section-label-dot"></span>Apply &amp; contact</div>
-    <h2>Application links</h2>
-    <div class="links-grid">
-      <a class="link-card" href="https://resurrectionproject.tfaforms.net/f/homegrown" target="_blank">
-        <div class="lc-label">Primary Application</div>
-        <div class="lc-name">The Resurrection Project</div>
-        <div class="lc-desc">TRP Lending, LLC — official HomeGrown administrator</div>
-        <div class="lc-arrow">↗</div>
-      </a>
-      <a class="link-card" href="https://www.chicago.gov/homegrown" target="_blank">
-        <div class="lc-label">Official Info</div>
-        <div class="lc-name">chicago.gov/homegrown</div>
-        <div class="lc-desc">City of Chicago Dept. of Housing program page</div>
-        <div class="lc-arrow">↗</div>
-      </a>
-      <a class="link-card" href="https://chicago.maps.arcgis.com/apps/instant/lookup/index.html?appid=f7b2382970c2412686a7dcab6a9c908c" target="_blank">
-        <div class="lc-label">Property Tool</div>
-        <div class="lc-name">Zone A/B Lookup</div>
-        <div class="lc-desc">Verify any property address before making an offer</div>
-        <div class="lc-arrow">↗</div>
-      </a>
-      <a class="link-card" href="https://www.hud.gov/program_offices/housing/sfh/hcc/hcs.cfm" target="_blank">
-        <div class="lc-label">Education Requirement</div>
-        <div class="lc-name">HUD Counselor Search</div>
-        <div class="lc-desc">Find HUD-certified homebuyer education near you</div>
-        <div class="lc-arrow">↗</div>
-      </a>
-      <a class="link-card" href="https://resurrectionproject.org/homegrown/" target="_blank">
-        <div class="lc-label">Full FAQ</div>
-        <div class="lc-name">TRP HomeGrown FAQ</div>
-        <div class="lc-desc">AMI chart, documents checklist, detailed eligibility</div>
-        <div class="lc-arrow">↗</div>
-      </a>
-      <a class="link-card" href="https://www.chicago.gov/content/dam/city/depts/doh/AMICharts/2026%20Income%20Limits.pdf" target="_blank">
-        <div class="lc-label">Income Chart</div>
-        <div class="lc-name">2026 AMI Limits PDF</div>
-        <div class="lc-desc">Official HUD income limits for Chicago metro area</div>
-        <div class="lc-arrow">↗</div>
-      </a>
-    </div>
-  </section>
-
-  <!-- LISTINGS -->
-  <section>
-    <div class="section-label"><span class="section-label-dot"></span>Active listings</div>
-    <div class="listings-header">
-      <h2>Bronzeville &amp; South Loop · $180k–$235k</h2>
-      <button class="open-all-btn" onclick="openAllSources()">Open all sources ↗</button>
-    </div>
-
-    <div class="zone-note">
-      <span class="zone-icon">📍</span>
-      <div><strong>Always verify Zone A before making an offer.</strong> Enter the exact property address into the Zone Lookup Tool above. Both neighborhoods are expected to be Zone A given appreciation trends, but it must be confirmed per address.</div>
-    </div>
-
-    <div class="search-banner">
-      <div class="sb-item">
-        <div class="sb-label">Redfin</div>
-        <a href="https://www.redfin.com/city/29470/IL/Chicago/condos/filter/max-price=235000,min-price=180000" target="_blank">Search Redfin →</a>
-        <div class="sb-desc">Condos $180k–$235k, Chicago</div>
-      </div>
-      <div class="sb-item">
-        <div class="sb-label">Zillow</div>
-        <a href="https://www.zillow.com/bronzeville-chicago-il/condos/?searchQueryState=%7B%22filterState%22%3A%7B%22price%22%3A%7B%22min%22%3A180000%2C%22max%22%3A235000%7D%2C%22con%22%3A%7B%22value%22%3Atrue%7D%7D%7D" target="_blank">Search Zillow →</a>
-        <div class="sb-desc">Bronzeville condos, filtered</div>
-      </div>
-      <div class="sb-item">
-        <div class="sb-label">Trulia</div>
-        <a href="https://www.trulia.com/IL/Chicago,Bronzeville/CONDO_type/PRICE=180000_235000/" target="_blank">Search Trulia →</a>
-        <div class="sb-desc">Bronzeville condos $180k–$235k</div>
-      </div>
-      <div class="sb-item">
-        <div class="sb-label">HotPads</div>
-        <a href="https://hotpads.com/chicago-il/condos-for-sale?price=180000_235000" target="_blank">Search HotPads →</a>
-        <div class="sb-desc">Condos, South Side price range</div>
-      </div>
-      <div class="sb-item">
-        <div class="sb-label">ChicagoPropertyShop</div>
-        <a href="https://www.chicagospropertyshop.com/bronzeville/" target="_blank">Search CPS →</a>
-        <div class="sb-desc">Bronzeville specialist listings</div>
-      </div>
-    </div>
-
-    <div class="listings-grid">
-
-      <div class="listing-card">
-        <a href="https://www.redfin.com/IL/Chicago/2605-S-Indiana-Ave-60616/unit-402/home/12726045" target="_blank">
-          <div class="listing-thumb">🏢</div>
-          <div class="listing-body">
-            <div class="listing-price">$168,900</div>
-            <div class="listing-addr">2605 S Indiana Ave #402</div>
-            <div class="listing-tags">
-              <span class="ltag">2 bed</span>
-              <span class="ltag">2 bath</span>
-              <span class="ltag">1,325 sq ft</span>
-              <span class="ltag ltag-zone">Verify Zone A</span>
-            </div>
-            <div class="listing-source">Redfin · MLS# 12408272</div>
-          </div>
-        </a>
-      </div>
-
-      <div class="listing-card">
-        <a href="https://www.redfin.com/neighborhood/35129/IL/Chicago/Bronzeville/cheap-condos" target="_blank">
-          <div class="listing-thumb">🏢</div>
-          <div class="listing-body">
-            <div class="listing-price">Check price</div>
-            <div class="listing-addr">2605 S Indiana Ave #409</div>
-            <div class="listing-tags">
-              <span class="ltag">1 bed</span>
-              <span class="ltag">Bronzeville</span>
-              <span class="ltag ltag-zone">Verify Zone A</span>
-            </div>
-            <div class="listing-source">Redfin · same building</div>
-          </div>
-        </a>
-      </div>
-
-      <div class="listing-card">
-        <a href="https://www.redfin.com/neighborhood/35129/IL/Chicago/Bronzeville/cheap-condos" target="_blank">
-          <div class="listing-thumb">🏢</div>
-          <div class="listing-body">
-            <div class="listing-price">Check price</div>
-            <div class="listing-addr">2921 S Michigan Ave #405</div>
-            <div class="listing-tags">
-              <span class="ltag">Bronzeville</span>
-              <span class="ltag ltag-zone">Verify Zone A</span>
-            </div>
-            <div class="listing-source">Redfin · Bronzeville cheap condos</div>
-          </div>
-        </a>
-      </div>
-
-      <div class="listing-card">
-        <a href="https://www.homes.com/chicago-il/south-loop-neighborhood/condos-for-sale/" target="_blank">
-          <div class="listing-thumb">🏙️</div>
-          <div class="listing-body">
-            <div class="listing-price">$229,900</div>
-            <div class="listing-addr">South Loop — 1 bed + balcony</div>
-            <div class="listing-tags">
-              <span class="ltag">1 bed</span>
-              <span class="ltag">Fireplace</span>
-              <span class="ltag">In-unit W/D</span>
-              <span class="ltag ltag-zone">Verify Zone A</span>
-            </div>
-            <div class="listing-source">Homes.com · confirm full address</div>
-          </div>
-        </a>
-      </div>
-
-      <div class="listing-card">
-        <a href="https://www.redfin.com/neighborhood/35129/IL/Chicago/Bronzeville/cheap-condos" target="_blank">
-          <div class="listing-thumb">🏢</div>
-          <div class="listing-body">
-            <div class="listing-price">Check price</div>
-            <div class="listing-addr">4551 S Michigan Ave Unit B</div>
-            <div class="listing-tags">
-              <span class="ltag">Bronzeville</span>
-              <span class="ltag ltag-zone">Verify Zone A</span>
-            </div>
-            <div class="listing-source">Redfin · South Bronzeville</div>
-          </div>
-        </a>
-      </div>
-
-      <div class="listing-card">
-        <a href="https://www.redfin.com/neighborhood/35129/IL/Chicago/Bronzeville/cheap-condos" target="_blank">
-          <div class="listing-thumb">🏢</div>
-          <div class="listing-body">
-            <div class="listing-price">Check price</div>
-            <div class="listing-addr">4837 S Forrestville Ave Unit G</div>
-            <div class="listing-tags">
-              <span class="ltag">Bronzeville</span>
-              <span class="ltag ltag-zone">Verify Zone A</span>
-            </div>
-            <div class="listing-source">Redfin · South Bronzeville</div>
-          </div>
-        </a>
-      </div>
-
-    </div>
-
-    <div class="listings-note">
-      ⟳ Listings on source sites update in real time. Use the search links above daily — units at this price point in these neighborhoods move fast. Always run the address through the Zone Tool before making an offer.
-    </div>
-  </section>
-
-</main>
-
-<footer>
-  HomeGrown Purchase Assistance &nbsp;·&nbsp;
-  <a href="https://www.chicago.gov/homegrown" target="_blank">chicago.gov/homegrown</a> &nbsp;·&nbsp;
-  Info: <a href="tel:3127443653">312-744-3653</a> &nbsp;·&nbsp;
-  TRP Lending: <a href="tel:3126661323">312-666-1323</a>
-</footer>
-
-</div><!-- end #app -->
-
+<div id="root"></div>
 <script>
-  // ─── PASSWORD (change "sunset2026" to anything you want) ───
-  const PASSWORD = "sunset2026";
+const {useState,useEffect}=React;
+const el=React.createElement;
+const PW="sunset2026";
+const grad="linear-gradient(135deg,#f4694b 0%,#e8506a 40%,#b05898 70%,#7048a0 100%)";
+const gDark="linear-gradient(160deg,#2d1230 0%,#1a0a14 55%,#0f0818 100%)";
+const C={coral:"#e8583a",coralLt:"#fad4cb",peach:"#f4956a",cream:"#fff8f4",ink:"#1a0a14",muted:"#9a6e7a",rule:"#f0ddd8",white:"#ffffff",green:"#1a6640",greenLt:"#d4f0e0"};
 
-  function unlock() {
-    const val = document.getElementById('pw-input').value;
-    const err = document.getElementById('lock-error');
-    if (val === PASSWORD) {
-      document.getElementById('lock-screen').style.transition = 'opacity 0.5s';
-      document.getElementById('lock-screen').style.opacity = '0';
-      setTimeout(() => {
-        document.getElementById('lock-screen').style.display = 'none';
-        document.getElementById('app').style.display = 'block';
-      }, 500);
-      sessionStorage.setItem('hg_unlocked', '1');
-    } else {
-      err.textContent = 'Incorrect password — try again.';
-      const card = document.querySelector('.lock-card');
-      card.classList.remove('shake');
-      void card.offsetWidth;
-      card.classList.add('shake');
-      document.getElementById('pw-input').value = '';
-      document.getElementById('pw-input').focus();
-      setTimeout(() => err.textContent = '', 3000);
-    }
+const RATE_30=6.48;
+const RATE_15=5.79;
+
+function stor(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k)||"null");localStorage.setItem(k,JSON.stringify(v));}catch{return null;}}
+function fmt(n){return n.toLocaleString("en-US",{minimumFractionDigits:0,maximumFractionDigits:0});}
+function fmtD(n){return"$"+fmt(Math.round(n));}
+function calcPI(principal,annualRate,years){
+  if(principal<=0||annualRate<=0)return 0;
+  const r=annualRate/100/12,n=years*12;
+  return principal*(r*Math.pow(1+r,n))/(Math.pow(1+r,n)-1);
+}
+
+const STEPS=[
+  {title:"Confirm income eligibility",badge:"Do first",bc:{bg:"#fad4cb",color:"#c0391a"},desc:"Your $95k income (~112% AMI) = $40,000 Zone A grant. All adults 18+ household income counts. Max to qualify: 150% AMI ($127,650 single)."},
+  {title:"Complete HUD homebuyer education",badge:"Required",bc:{bg:"#fef0d4",color:"#8a5a10"},desc:"Must complete before applying. Find a HUD-certified counselor (NHS Chicago). You'll get a certificate needed for the application.",link:{label:"Find HUD counselors",url:"https://www.hud.gov/program_offices/housing/sfh/hcc/hcs.cfm"}},
+  {title:"Get mortgage pre-approval",badge:"Required",bc:{bg:"#fef0d4",color:"#8a5a10"},desc:"Pre-approval letter required. At $95k you qualify comfortably for ~$188k. TRP Lending works directly with HomeGrown.",link:{label:"TRP Lending: (312) 666-1323",url:"tel:+13126661323"}},
+  {title:"Gather income documents",badge:"Required",bc:{bg:"#fef0d4",color:"#8a5a10"},desc:"All household adults 18+: last 3 pay stubs · 2 years federal tax returns + schedules · 2 years W-2s · Social Security/pension statements."},
+  {title:"Find a property & verify Zone A",badge:"Critical",bc:{bg:"#fce8ec",color:"#b02040"},desc:"Eligible: condo, single-family, townhome, 2-flat. No new construction. Run every address through the Zone Tool before an offer.",link:{label:"Open Zone A/B Lookup Tool",url:"https://chicago.maps.arcgis.com/apps/instant/lookup/index.html?appid=f7b2382970c2412686a7dcab6a9c908c"}},
+  {title:"Sign a purchase contract",desc:"Fully executed purchase contract required to submit. $40k stays within 25% cap across $180k–$235k. Must occupy 5+ years."},
+  {title:"Submit application — act fast",badge:"First-come",bc:{bg:"#fad4cb",color:"#c0391a"},desc:"$21M fund, ~300–400 buyers. Applications opened June 8, 2026. Apply through TRP Lending or Neighborhood Lending Services.",link:{label:"Apply — The Resurrection Project",url:"https://resurrectionproject.tfaforms.net/f/homegrown"},link2:{label:"chicago.gov/homegrown",url:"https://www.chicago.gov/homegrown"}},
+  {title:"Have $2,300 personal contribution ready",badge:"Required",bc:{bg:"#fef0d4",color:"#8a5a10"},desc:"At $230k, must contribute 1% ($2,300) from personal funds — not a gift or loan. Required in addition to the grant."},
+];
+
+const APP_LINKS=[
+  {label:"Primary Application",name:"The Resurrection Project",desc:"TRP Lending — official HomeGrown admin",url:"https://resurrectionproject.tfaforms.net/f/homegrown"},
+  {label:"Official Program Info",name:"chicago.gov/homegrown",desc:"City of Chicago Dept. of Housing",url:"https://www.chicago.gov/homegrown"},
+  {label:"Zone Tool",name:"Zone A/B Lookup",desc:"Verify any address before an offer",url:"https://chicago.maps.arcgis.com/apps/instant/lookup/index.html?appid=f7b2382970c2412686a7dcab6a9c908c"},
+  {label:"Education Requirement",name:"HUD Counselor Search",desc:"Find HUD-certified education nearby",url:"https://www.hud.gov/program_offices/housing/sfh/hcc/hcs.cfm"},
+  {label:"Full FAQ",name:"TRP HomeGrown FAQ",desc:"AMI chart, docs checklist, eligibility",url:"https://resurrectionproject.org/homegrown/"},
+  {label:"Income Chart",name:"2026 AMI Limits PDF",desc:"Official HUD limits for Chicago metro",url:"https://www.chicago.gov/content/dam/city/depts/doh/AMICharts/2026%20Income%20Limits.pdf"},
+];
+
+const SOURCES=[
+  {name:"Redfin",desc:"Condos $180k–$235k",url:"https://www.redfin.com/city/29470/IL/Chicago/condos/filter/max-price=235000,min-price=180000"},
+  {name:"Zillow",desc:"Bronzeville filtered",url:"https://www.zillow.com/bronzeville-chicago-il/condos/"},
+  {name:"Trulia",desc:"Bronzeville $180k–$235k",url:"https://www.trulia.com/IL/Chicago,Bronzeville/CONDO_type/PRICE=180000_235000/"},
+  {name:"HotPads",desc:"South Side condos",url:"https://hotpads.com/chicago-il/condos-for-sale?price=180000_235000"},
+  {name:"ChicagoPropertyShop",desc:"Bronzeville specialist",url:"https://www.chicagospropertyshop.com/bronzeville/"},
+];
+
+const SEED=[
+  {id:"s1",addr:"2605 S Indiana Ave #402",price:"$168,900",rawPrice:168900,url:"https://www.redfin.com/IL/Chicago/2605-S-Indiana-Ave-60616/unit-402/home/12726045",zoneA:"unverified",fav:false},
+  {id:"s2",addr:"2605 S Indiana Ave #409",price:"Check price",rawPrice:0,url:"https://www.redfin.com/neighborhood/35129/IL/Chicago/Bronzeville/cheap-condos",zoneA:"unverified",fav:false},
+  {id:"s3",addr:"2921 S Michigan Ave #405",price:"Check price",rawPrice:0,url:"https://www.redfin.com/neighborhood/35129/IL/Chicago/Bronzeville/cheap-condos",zoneA:"unverified",fav:false},
+  {id:"s4",addr:"South Loop — 1 bed + balcony",price:"$229,900",rawPrice:229900,url:"https://www.homes.com/chicago-il/south-loop-neighborhood/condos-for-sale/",zoneA:"unverified",fav:false},
+  {id:"s5",addr:"4551 S Michigan Ave Unit B",price:"Check price",rawPrice:0,url:"https://www.redfin.com/neighborhood/35129/IL/Chicago/Bronzeville/cheap-condos",zoneA:"unverified",fav:false},
+  {id:"s6",addr:"4837 S Forrestville Ave Unit G",price:"Check price",rawPrice:0,url:"https://www.redfin.com/neighborhood/35129/IL/Chicago/Bronzeville/cheap-condos",zoneA:"unverified",fav:false},
+];
+
+/* ── LOCK ─────────────────────────────────────────────── */
+function LockScreen({onUnlock}){
+  const[pw,setPw]=useState("");const[show,setShow]=useState(false);
+  const[err,setErr]=useState("");const[shake,setShake]=useState(false);
+  function tryUnlock(){
+    if(pw===PW)onUnlock();
+    else{setErr("Incorrect password — try again.");setPw("");setShake(true);setTimeout(()=>setShake(false),500);setTimeout(()=>setErr(""),3000);}
+  }
+  return el("div",{style:{minHeight:"100vh",background:gDark,display:"flex",alignItems:"center",justifyContent:"center",padding:24,position:"relative",overflow:"hidden"}},
+    el("div",{style:{position:"absolute",width:500,height:500,borderRadius:"50%",background:"radial-gradient(circle,rgba(244,105,75,0.2) 0%,transparent 70%)",top:"50%",left:"50%",transform:"translate(-50%,-50%)",pointerEvents:"none"}}),
+    el("div",{style:{position:"relative",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.13)",borderRadius:24,padding:"40px 28px 32px",width:"100%",maxWidth:400,textAlign:"center",animation:shake?"shake 0.45s ease":"none"}},
+      el("div",{style:{fontSize:44,marginBottom:12}},"🌅"),
+      el("div",{style:{fontFamily:"Georgia,serif",fontSize:26,color:"#fff",marginBottom:6}},"HomeGrown Hub"),
+      el("div",{style:{fontSize:13,color:"rgba(255,255,255,0.4)",marginBottom:32}},"Your private grant & listings dashboard"),
+      el("div",{style:{position:"relative",marginBottom:14}},
+        el("input",{type:show?"text":"password",value:pw,onChange:e=>setPw(e.target.value),onKeyDown:e=>e.key==="Enter"&&tryUnlock(),placeholder:"Enter password",autoComplete:"off",autoCorrect:"off",autoCapitalize:"none",spellCheck:false,style:{width:"100%",padding:"16px 52px 16px 20px",background:"rgba(255,255,255,0.09)",border:"1.5px solid rgba(255,255,255,0.18)",borderRadius:12,color:"#fff",fontSize:18,letterSpacing:"0.2em",textAlign:"center",outline:"none",WebkitAppearance:"none",boxSizing:"border-box"}}),
+        el("button",{onClick:()=>setShow(s=>!s),style:{position:"absolute",right:14,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",color:"rgba(255,255,255,0.45)",fontSize:18,cursor:"pointer",padding:4}},show?"🙈":"👁")
+      ),
+      el("button",{onClick:tryUnlock,style:{width:"100%",padding:16,background:grad,border:"none",borderRadius:12,color:"#fff",fontSize:16,fontWeight:700,cursor:"pointer",boxShadow:"0 8px 24px rgba(244,105,75,0.3)"}},"Unlock Dashboard"),
+      err&&el("div",{style:{marginTop:12,fontSize:13,color:C.coral}},err),
+      el("div",{style:{marginTop:24,fontSize:11,color:"rgba(255,255,255,0.18)",fontFamily:"monospace"}},"protected · sunset edition")
+    )
+  );
+}
+
+/* ── CHECKLIST ────────────────────────────────────────── */
+function Checklist(){
+  const[done,setDone]=useState(()=>stor("hg_cl")||[]);
+  function toggle(i){const next=done.includes(i)?done.filter(x=>x!==i):[...done,i];setDone(next);stor("hg_cl",next);}
+  const pct=Math.round(done.length/STEPS.length*100);
+  return el("div",null,
+    el("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:6}},
+      el("span",{style:{fontSize:11,color:C.muted,fontFamily:"monospace"}},"Progress"),
+      el("span",{style:{fontSize:11,color:C.muted,fontFamily:"monospace"}},done.length+" of "+STEPS.length)
+    ),
+    el("div",{style:{background:C.rule,borderRadius:100,height:5,marginBottom:20,overflow:"hidden"}},
+      el("div",{style:{height:"100%",width:pct+"%",background:grad,borderRadius:100,transition:"width 0.5s"}})
+    ),
+    el("div",{style:{display:"flex",flexDirection:"column",gap:10}},
+      STEPS.map((s,i)=>{
+        const d=done.includes(i);
+        return el("div",{key:i,onClick:()=>toggle(i),style:{display:"flex",gap:12,alignItems:"flex-start",background:d?"linear-gradient(135deg,#fff8f5,#ffeef4)":C.white,border:`1.5px solid ${d?"#f5c0b0":C.rule}`,borderLeft:`3.5px solid ${d?C.coral:C.rule}`,borderRadius:14,padding:14,cursor:"pointer"}},
+          el("div",{style:{width:22,height:22,borderRadius:7,flexShrink:0,marginTop:1,background:d?grad:C.white,border:d?"none":"2px solid "+C.rule,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,color:"#fff"}},d&&"✓"),
+          el("div",{style:{flex:1,minWidth:0}},
+            el("div",{style:{display:"flex",flexWrap:"wrap",gap:7,alignItems:"center",marginBottom:3}},
+              el("span",{style:{fontWeight:700,fontSize:13,color:d?C.coral:C.ink,textDecoration:d?"line-through":"none"}},s.title),
+              s.badge&&el("span",{style:{fontFamily:"monospace",fontSize:9,letterSpacing:"0.09em",textTransform:"uppercase",padding:"2px 8px",borderRadius:100,background:s.bc.bg,color:s.bc.color,fontWeight:600}},s.badge)
+            ),
+            el("div",{style:{fontSize:12,color:C.muted,lineHeight:1.6}},s.desc),
+            s.link&&el("a",{href:s.link.url,target:"_blank",rel:"noreferrer",onClick:e=>e.stopPropagation(),style:{display:"inline-block",marginTop:7,fontSize:11,fontWeight:700,color:C.coral,textDecoration:"none",fontFamily:"monospace"}},"→ "+s.link.label),
+            s.link2&&el("a",{href:s.link2.url,target:"_blank",rel:"noreferrer",onClick:e=>e.stopPropagation(),style:{display:"inline-block",marginTop:5,marginLeft:8,fontSize:11,fontWeight:700,color:C.coral,textDecoration:"none",fontFamily:"monospace"}},"→ "+s.link2.label)
+          )
+        );
+      })
+    )
+  );
+}
+
+/* ── CALCULATOR ───────────────────────────────────────── */
+function Calculator({fromListing}){
+  const[price,setPrice]=useState(fromListing&&fromListing.rawPrice?String(fromListing.rawPrice):"230000");
+  const[grant,setGrant]=useState("40000");
+  const[hoa,setHoa]=useState("425");
+  const[rate30,setRate30]=useState(String(RATE_30));
+  const[rate15,setRate15]=useState(String(RATE_15));
+  const[taxRate,setTaxRate]=useState("1.66");
+  const[term,setTerm]=useState("30");
+  const[income,setIncome]=useState("95000");
+  const[source,setSource]=useState(fromListing?fromListing.addr:null);
+
+  useEffect(()=>{
+    if(fromListing&&fromListing.rawPrice){setPrice(String(fromListing.rawPrice));setSource(fromListing.addr);}
+  },[fromListing&&fromListing.id]);
+
+  const p=parseFloat(price)||0;
+  const g=parseFloat(grant)||0;
+  const h=parseFloat(hoa)||0;
+  const r30=parseFloat(rate30)||RATE_30;
+  const r15=parseFloat(rate15)||RATE_15;
+  const tr=parseFloat(taxRate)||1.66;
+  const inc=parseFloat(income)||0;
+  const loan=Math.max(0,p-g);
+  const pi30=calcPI(loan,r30,30);
+  const pi15=calcPI(loan,r15,15);
+  const monthlyTax=(p*tr/100)/12;
+  const insurance=p*0.0065/12;
+  const total30=pi30+h+monthlyTax+insurance;
+  const total15=pi15+h+monthlyTax+insurance;
+  const totalActive=term==="30"?total30:total15;
+  const piActive=term==="30"?pi30:pi15;
+  const grossMonthly=inc/12;
+  const dti28=grossMonthly*0.28;
+  const qualifies=totalActive<=dti28;
+  const qualifiesStretched=totalActive<=(grossMonthly*0.36);
+  const incNeeded=(totalActive/0.28)*12;
+  const pctIncome=grossMonthly>0?Math.round(totalActive/grossMonthly*100):0;
+  const barColor=pctIncome<=28?"#1a6640":pctIncome<=36?"#e8961e":"#c0391a";
+  const totalInterest30=pi30*30*12-loan;
+  const totalInterest15=pi15*15*12-loan;
+
+  function Field({label,value,onChange,prefix,suffix}){
+    return el("div",{style:{marginBottom:12}},
+      el("label",{style:{fontSize:10,color:C.muted,fontFamily:"monospace",letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:5}},label),
+      el("div",{style:{position:"relative",display:"flex",alignItems:"center"}},
+        prefix&&el("span",{style:{position:"absolute",left:12,fontSize:14,color:C.muted,pointerEvents:"none"}},"$"),
+        el("input",{value,onChange:ev=>onChange(ev.target.value),type:"number",inputMode:"decimal",style:{width:"100%",padding:`11px 12px 11px ${prefix?"28px":"12px"}`,border:`1.5px solid ${C.rule}`,borderRadius:10,fontSize:14,color:C.ink,background:C.white,outline:"none",boxSizing:"border-box",WebkitAppearance:"none"}}),
+        suffix&&el("span",{style:{position:"absolute",right:12,fontSize:12,color:C.muted,pointerEvents:"none"}},suffix)
+      )
+    );
   }
 
-  function togglePw() {
-    const inp = document.getElementById('pw-input');
-    inp.type = inp.type === 'password' ? 'text' : 'password';
-  }
+  return el("div",{style:{animation:"slideIn 0.2s ease"}},
+    source&&el("div",{style:{display:"flex",alignItems:"center",gap:8,background:"linear-gradient(135deg,#fff0ec,#ffeef4)",border:`1.5px solid ${C.coralLt}`,borderRadius:12,padding:"10px 14px",marginBottom:16,fontSize:12,color:C.coral,fontWeight:700}},"📍 "+source),
 
-  // Stay unlocked during the session
-  if (sessionStorage.getItem('hg_unlocked') === '1') {
-    document.getElementById('lock-screen').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-  }
+    el("div",{style:{background:gDark,borderRadius:14,padding:"14px 16px",marginBottom:18,position:"relative",overflow:"hidden"}},
+      el("div",{style:{position:"absolute",inset:0,background:"radial-gradient(ellipse 80% 100% at 100% 100%,rgba(244,105,75,0.18) 0%,transparent 55%)",pointerEvents:"none"}}),
+      el("div",{style:{fontFamily:"monospace",fontSize:9,letterSpacing:"0.14em",textTransform:"uppercase",color:"rgba(255,255,255,0.3)",marginBottom:10,position:"relative"}},"Live rates · Freddie Mac June 4, 2026"),
+      el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,position:"relative"}},
+        el("div",null,
+          el("div",{style:{fontSize:9,fontFamily:"monospace",color:"rgba(255,255,255,0.3)",marginBottom:3,textTransform:"uppercase",letterSpacing:"0.1em"}},"30-yr fixed"),
+          el("div",{style:{fontFamily:"Georgia,serif",fontSize:22,fontStyle:"italic",background:grad,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}},RATE_30+"%")
+        ),
+        el("div",null,
+          el("div",{style:{fontSize:9,fontFamily:"monospace",color:"rgba(255,255,255,0.3)",marginBottom:3,textTransform:"uppercase",letterSpacing:"0.1em"}},"15-yr fixed"),
+          el("div",{style:{fontFamily:"Georgia,serif",fontSize:22,fontStyle:"italic",background:grad,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}},RATE_15+"%")
+        )
+      )
+    ),
 
-  // ─── CHECKLIST ───
-  function toggleCheck(el) {
-    el.classList.toggle('done');
-    updateProgress();
-    saveState();
-  }
+    el("div",{style:{background:C.white,border:`1.5px solid ${C.rule}`,borderRadius:16,padding:"18px 16px",marginBottom:16}},
+      el("div",{style:{fontFamily:"monospace",fontSize:10,letterSpacing:"0.15em",textTransform:"uppercase",color:C.muted,marginBottom:14}},"Your numbers"),
+      el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:0}},
+        el("div",{style:{paddingRight:8}},el(Field,{label:"Purchase price",value:price,onChange:setPrice,prefix:true})),
+        el("div",{style:{paddingLeft:8}},el(Field,{label:"Grant / down payment",value:grant,onChange:setGrant,prefix:true}))
+      ),
+      el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:0}},
+        el("div",{style:{paddingRight:8}},el(Field,{label:"Monthly HOA",value:hoa,onChange:setHoa,prefix:true})),
+        el("div",{style:{paddingLeft:8}},el(Field,{label:"Annual income",value:income,onChange:setIncome,prefix:true}))
+      ),
+      el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:0}},
+        el("div",{style:{paddingRight:6}},el(Field,{label:"30yr rate",value:rate30,onChange:setRate30,suffix:"%"})),
+        el("div",{style:{paddingLeft:3,paddingRight:3}},el(Field,{label:"15yr rate",value:rate15,onChange:setRate15,suffix:"%"})),
+        el("div",{style:{paddingLeft:6}},el(Field,{label:"Tax rate",value:taxRate,onChange:setTaxRate,suffix:"%"}))
+      ),
+      el("div",{style:{marginTop:4}},
+        el("label",{style:{fontSize:10,color:C.muted,fontFamily:"monospace",letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:8}},"Loan term"),
+        el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}},
+          ["30","15"].map(t=>el("button",{key:t,onClick:()=>setTerm(t),style:{padding:10,borderRadius:10,border:`1.5px solid ${term===t?C.coral:C.rule}`,background:term===t?"linear-gradient(135deg,#fff0ec,#ffeef4)":C.white,color:term===t?C.coral:C.muted,fontWeight:700,fontSize:13,cursor:"pointer",fontFamily:"inherit"}},t+"-year"))
+        )
+      )
+    ),
 
-  function updateProgress() {
-    const items = document.querySelectorAll('.check-item');
-    const done  = document.querySelectorAll('.check-item.done').length;
-    const pct   = Math.round((done / items.length) * 100);
-    document.getElementById('progress-bar').style.width = pct + '%';
-    document.getElementById('progress-text').textContent = done + ' of ' + items.length + ' complete';
-  }
+    el("div",{style:{background:gDark,borderRadius:16,padding:"20px 18px",marginBottom:16,position:"relative",overflow:"hidden"}},
+      el("div",{style:{position:"absolute",inset:0,background:"radial-gradient(ellipse 80% 80% at 90% 110%,rgba(244,105,75,0.22) 0%,transparent 55%)",pointerEvents:"none"}}),
+      el("div",{style:{fontFamily:"monospace",fontSize:9,letterSpacing:"0.14em",textTransform:"uppercase",color:"rgba(255,255,255,0.3)",marginBottom:16,position:"relative"}},term+"-year breakdown · "+fmtD(loan)+" loan"),
+      el("div",{style:{display:"flex",flexDirection:"column",gap:10,position:"relative"}},
+        [
+          {label:"Principal & Interest",val:piActive,accent:true},
+          {label:"Property Tax (~"+taxRate+"%/yr)",val:monthlyTax},
+          {label:"HOA (Chicago avg 2026)",val:h},
+          {label:"Condo Insurance (~0.65%/yr)",val:insurance},
+        ].map(row=>el("div",{key:row.label,style:{display:"flex",justifyContent:"space-between",alignItems:"center",paddingBottom:10,borderBottom:"1px solid rgba(255,255,255,0.06)"}},
+          el("span",{style:{fontSize:12,color:row.accent?"rgba(255,255,255,0.8)":"rgba(255,255,255,0.45)"}},row.label),
+          el("span",{style:{fontFamily:"Georgia,serif",fontSize:row.accent?18:14,fontStyle:"italic",color:row.accent?"transparent":"rgba(255,255,255,0.6)",background:row.accent?grad:"none",WebkitBackgroundClip:row.accent?"text":"unset",WebkitTextFillColor:row.accent?"transparent":"rgba(255,255,255,0.6)"}},fmtD(row.val))
+        )),
+        el("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",paddingTop:4}},
+          el("span",{style:{fontSize:14,fontWeight:700,color:"#fff"}},"Total Monthly"),
+          el("span",{style:{fontFamily:"Georgia,serif",fontSize:26,fontStyle:"italic",background:grad,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}},fmtD(totalActive))
+        )
+      )
+    ),
 
-  function saveState() {
-    const states = Array.from(document.querySelectorAll('.check-item')).map(el => el.classList.contains('done'));
-    localStorage.setItem('hg_checklist', JSON.stringify(states));
-  }
+    el("div",{style:{background:C.white,border:`1.5px solid ${C.rule}`,borderRadius:16,padding:"16px",marginBottom:16}},
+      el("div",{style:{fontFamily:"monospace",fontSize:10,letterSpacing:"0.15em",textTransform:"uppercase",color:C.muted,marginBottom:14}},"30-yr vs 15-yr comparison"),
+      el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}},
+        [{t:"30",pi:pi30,total:total30,rate:r30,interest:totalInterest30},{t:"15",pi:pi15,total:total15,rate:r15,interest:totalInterest15}].map(col=>
+          el("div",{key:col.t,onClick:()=>setTerm(col.t),style:{background:term===col.t?"linear-gradient(135deg,#fff0ec,#ffeef4)":"#fafafa",border:`1.5px solid ${term===col.t?C.coralLt:C.rule}`,borderRadius:12,padding:"14px 12px",cursor:"pointer"}},
+            el("div",{style:{fontFamily:"monospace",fontSize:9,letterSpacing:"0.12em",textTransform:"uppercase",color:C.muted,marginBottom:6}},col.t+"-yr · "+col.rate+"%"),
+            el("div",{style:{fontFamily:"Georgia,serif",fontSize:18,fontStyle:"italic",background:grad,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",marginBottom:4}},fmtD(col.total)+"/mo"),
+            el("div",{style:{fontSize:11,color:C.muted}},"P&I: "+fmtD(col.pi)),
+            el("div",{style:{fontSize:11,color:C.muted,marginTop:2}},"Total interest: "+fmtD(Math.max(0,col.interest)))
+          )
+        )
+      ),
+      loan>0&&el("div",{style:{marginTop:12,padding:"10px 12px",background:"#fafafa",borderRadius:10,fontSize:11,color:C.muted,lineHeight:1.6}},
+        "💡 15-yr saves "+fmtD(Math.max(0,totalInterest30-totalInterest15))+" in total interest but costs "+fmtD(Math.max(0,pi15-pi30))+" more per month."
+      )
+    ),
 
-  window.addEventListener('load', () => {
-    const saved = JSON.parse(localStorage.getItem('hg_checklist') || '[]');
-    document.querySelectorAll('.check-item').forEach((item, i) => {
-      if (saved[i]) item.classList.add('done');
-    });
-    updateProgress();
-  });
+    el("div",{style:{background:C.white,border:`1.5px solid ${C.rule}`,borderRadius:16,padding:"16px"}},
+      el("div",{style:{fontFamily:"monospace",fontSize:10,letterSpacing:"0.15em",textTransform:"uppercase",color:C.muted,marginBottom:14}},"Income qualifier · "+term+"-year"),
+      el("div",{style:{marginBottom:12}},
+        el("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:6}},
+          el("span",{style:{fontSize:12,color:C.muted}},"Housing cost % of gross income"),
+          el("span",{style:{fontSize:13,fontWeight:700,color:barColor}},pctIncome+"%")
+        ),
+        el("div",{style:{background:C.rule,borderRadius:100,height:8,overflow:"hidden"}},
+          el("div",{style:{height:"100%",width:Math.min(100,pctIncome)+"%",background:barColor,borderRadius:100,transition:"width 0.4s"}})
+        ),
+        el("div",{style:{display:"flex",justifyContent:"space-between",marginTop:4}},
+          el("span",{style:{fontSize:9,fontFamily:"monospace",color:C.muted}},"Ideal ≤28%"),
+          el("span",{style:{fontSize:9,fontFamily:"monospace",color:C.muted}},"Max ≤36%")
+        )
+      ),
+      el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}},
+        el("div",{style:{background:"#fafafa",borderRadius:10,padding:"12px 10px",textAlign:"center"}},
+          el("div",{style:{fontSize:9,fontFamily:"monospace",color:C.muted,marginBottom:4,textTransform:"uppercase",letterSpacing:"0.1em"}},"Your income"),
+          el("div",{style:{fontFamily:"Georgia,serif",fontSize:16,fontStyle:"italic",background:grad,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}},fmtD(inc)+"/yr")
+        ),
+        el("div",{style:{background:qualifies?"linear-gradient(135deg,#d4f0e0,#e8f8ef)":qualifiesStretched?"linear-gradient(135deg,#fef0d4,#fff6e0)":"linear-gradient(135deg,#fce8ec,#ffeef4)",border:`1px solid ${qualifies?"#a8d4bc":qualifiesStretched?"#f0c060":C.coralLt}`,borderRadius:10,padding:"12px 10px",textAlign:"center"}},
+          el("div",{style:{fontSize:9,fontFamily:"monospace",color:C.muted,marginBottom:4,textTransform:"uppercase",letterSpacing:"0.1em"}},"Status"),
+          el("div",{style:{fontSize:13,fontWeight:700,color:qualifies?C.green:qualifiesStretched?"#8a5a10":C.coral}},qualifies?"✓ Comfortable":qualifiesStretched?"⚠ Stretched":"✗ Over limit")
+        )
+      ),
+      !qualifies&&el("div",{style:{padding:"10px 12px",background:"linear-gradient(135deg,#fff4f0,#ffeef4)",borderRadius:10,fontSize:12,color:"#7a3030",lineHeight:1.6}},
+        "Income needed for 28% rule: ",el("strong",null,fmtD(incNeeded)+"/yr."),
+        qualifiesStretched?" You're within the 36% stretch threshold — workable but tighter.":" Consider a lower price point."
+      )
+    )
+  );
+}
 
-  // ─── OPEN ALL SOURCES ───
-  function openAllSources() {
-    [
-      'https://www.redfin.com/city/29470/IL/Chicago/condos/filter/max-price=235000,min-price=180000',
-      'https://www.zillow.com/bronzeville-chicago-il/condos/?searchQueryState=%7B%22filterState%22%3A%7B%22price%22%3A%7B%22min%22%3A180000%2C%22max%22%3A235000%7D%2C%22con%22%3A%7B%22value%22%3Atrue%7D%7D%7D',
-      'https://www.trulia.com/IL/Chicago,Bronzeville/CONDO_type/PRICE=180000_235000/',
-      'https://hotpads.com/chicago-il/condos-for-sale?price=180000_235000',
-      'https://www.chicagospropertyshop.com/bronzeville/'
-    ].forEach(u => window.open(u, '_blank'));
-  }
+/* ── MY WATCHLIST ─────────────────────────────────────── */
+function MyListings({onCalc}){
+  const[listings,setListings]=useState(()=>stor("hg_watch")||SEED);
+  const[showForm,setShowForm]=useState(false);
+  const[form,setForm]=useState({addr:"",price:"",rawPrice:"",url:"",zoneA:"unverified"});
+  const[filter,setFilter]=useState("all");
+  function save(next){setListings(next);stor("hg_watch",next);}
+  function addListing(){if(!form.addr.trim())return;save([{id:"u"+Date.now(),...form,rawPrice:parseFloat(form.rawPrice)||0,fav:false},...listings]);setForm({addr:"",price:"",rawPrice:"",url:"",zoneA:"unverified"});setShowForm(false);}
+  function toggleFav(id){save(listings.map(l=>l.id===id?{...l,fav:!l.fav}:l));}
+  function toggleZone(id){save(listings.map(l=>{if(l.id!==id)return l;const nxt=l.zoneA==="unverified"?"verified":l.zoneA==="verified"?"not-zone-a":"unverified";return{...l,zoneA:nxt};}));}
+  function remove(id){save(listings.filter(l=>l.id!==id));}
+  const zoneLabel={verified:{label:"Zone A ✓",bg:C.greenLt,color:C.green},unverified:{label:"Verify Zone A",bg:"#fff0ec",color:C.coral},"not-zone-a":{label:"Not Zone A",bg:"#fce8ec",color:"#b02040"}};
+  const shown=filter==="fav"?listings.filter(l=>l.fav):listings;
+  return el("div",null,
+    el("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}},
+      el("div",{style:{display:"flex",gap:8}},
+        el("button",{onClick:()=>setFilter("all"),style:{fontSize:11,fontWeight:700,padding:"6px 14px",borderRadius:100,border:`1.5px solid ${filter==="all"?C.coral:C.rule}`,background:filter==="all"?"linear-gradient(135deg,#fff0ec,#ffeef4)":C.white,color:filter==="all"?C.coral:C.muted,cursor:"pointer",fontFamily:"inherit"}},"All ("+listings.length+")"),
+        el("button",{onClick:()=>setFilter("fav"),style:{fontSize:11,fontWeight:700,padding:"6px 14px",borderRadius:100,border:`1.5px solid ${filter==="fav"?C.coral:C.rule}`,background:filter==="fav"?"linear-gradient(135deg,#fff0ec,#ffeef4)":C.white,color:filter==="fav"?C.coral:C.muted,cursor:"pointer",fontFamily:"inherit"}},"⭐ ("+listings.filter(l=>l.fav).length+")")
+      ),
+      el("button",{onClick:()=>setShowForm(s=>!s),style:{fontSize:12,fontWeight:700,padding:"8px 16px",borderRadius:100,background:showForm?"#f0ddd8":grad,color:showForm?C.muted:"#fff",border:"none",cursor:"pointer",fontFamily:"inherit"}},showForm?"Cancel":"+ Add")
+    ),
+    showForm&&el("div",{style:{background:"linear-gradient(135deg,#fff8f5,#ffeef4)",border:`1.5px solid ${C.coralLt}`,borderRadius:16,padding:"18px 16px",marginBottom:16,animation:"slideIn 0.2s ease"}},
+      el("div",{style:{fontFamily:"monospace",fontSize:10,letterSpacing:"0.15em",textTransform:"uppercase",color:C.muted,marginBottom:14}},"Add a listing to watch"),
+      el("div",{style:{marginBottom:10}},
+        el("label",{style:{fontSize:10,color:C.muted,fontFamily:"monospace",display:"block",marginBottom:5,textTransform:"uppercase",letterSpacing:"0.1em"}},"Address *"),
+        el("input",{value:form.addr,onChange:e=>setForm(f=>({...f,addr:e.target.value})),placeholder:"e.g. 3200 S King Dr #4B",style:{width:"100%",padding:"11px 14px",border:`1.5px solid ${C.rule}`,borderRadius:10,fontSize:13,color:C.ink,background:C.white,outline:"none",boxSizing:"border-box"}})
+      ),
+      el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}},
+        el("div",null,
+          el("label",{style:{fontSize:10,color:C.muted,fontFamily:"monospace",display:"block",marginBottom:5,textTransform:"uppercase",letterSpacing:"0.1em"}},"Display price"),
+          el("input",{value:form.price,onChange:e=>setForm(f=>({...f,price:e.target.value})),placeholder:"$215,000",style:{width:"100%",padding:"11px 12px",border:`1.5px solid ${C.rule}`,borderRadius:10,fontSize:13,color:C.ink,background:C.white,outline:"none",boxSizing:"border-box"}})
+        ),
+        el("div",null,
+          el("label",{style:{fontSize:10,color:C.muted,fontFamily:"monospace",display:"block",marginBottom:5,textTransform:"uppercase",letterSpacing:"0.1em"}},"Price (numbers only)"),
+          el("input",{value:form.rawPrice,onChange:e=>setForm(f=>({...f,rawPrice:e.target.value})),placeholder:"215000",type:"number",inputMode:"numeric",style:{width:"100%",padding:"11px 12px",border:`1.5px solid ${C.rule}`,borderRadius:10,fontSize:13,color:C.ink,background:C.white,outline:"none",boxSizing:"border-box",WebkitAppearance:"none"}})
+        )
+      ),
+      el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}},
+        el("div",null,
+          el("label",{style:{fontSize:10,color:C.muted,fontFamily:"monospace",display:"block",marginBottom:5,textTransform:"uppercase",letterSpacing:"0.1em"}},"Zone A status"),
+          el("select",{value:form.zoneA,onChange:e=>setForm(f=>({...f,zoneA:e.target.value})),style:{width:"100%",padding:"11px 12px",border:`1.5px solid ${C.rule}`,borderRadius:10,fontSize:12,color:C.ink,background:C.white,outline:"none",boxSizing:"border-box",WebkitAppearance:"none"}},
+            el("option",{value:"unverified"},"Unverified"),
+            el("option",{value:"verified"},"Zone A ✓"),
+            el("option",{value:"not-zone-a"},"Not Zone A")
+          )
+        ),
+        el("div",null,
+          el("label",{style:{fontSize:10,color:C.muted,fontFamily:"monospace",display:"block",marginBottom:5,textTransform:"uppercase",letterSpacing:"0.1em"}},"Listing URL"),
+          el("input",{value:form.url,onChange:e=>setForm(f=>({...f,url:e.target.value})),placeholder:"https://...",style:{width:"100%",padding:"11px 12px",border:`1.5px solid ${C.rule}`,borderRadius:10,fontSize:12,color:C.ink,background:C.white,outline:"none",boxSizing:"border-box"}})
+        )
+      ),
+      el("button",{onClick:addListing,style:{width:"100%",padding:13,background:grad,border:"none",borderRadius:12,color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}},"Save to Watchlist")
+    ),
+    shown.length===0&&el("div",{style:{textAlign:"center",padding:"40px 20px",color:C.muted,fontSize:13}},
+      el("div",{style:{fontSize:36,marginBottom:12}},"🏠"),
+      filter==="fav"?"No favorites yet — tap ⭐ on a listing.":"No listings yet — tap + Add."
+    ),
+    el("div",{style:{display:"flex",flexDirection:"column",gap:10}},
+      shown.map(l=>{
+        const zl=zoneLabel[l.zoneA]||zoneLabel.unverified;
+        return el("div",{key:l.id,style:{background:C.white,border:`1.5px solid ${l.fav?"#f5c0b0":C.rule}`,borderLeft:`3.5px solid ${l.fav?C.coral:C.rule}`,borderRadius:14,padding:14,animation:"slideIn 0.2s ease"}},
+          el("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}},
+            el("div",{style:{flex:1,minWidth:0,paddingRight:8}},
+              el("div",{style:{fontWeight:700,fontSize:13,color:C.ink,marginBottom:2,lineHeight:1.3}},l.addr),
+              l.price&&el("div",{style:{fontFamily:"Georgia,serif",fontSize:15,fontStyle:"italic",background:grad,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}},l.price)
+            ),
+            el("button",{onClick:()=>toggleFav(l.id),style:{background:"none",border:"none",fontSize:22,cursor:"pointer",padding:4,lineHeight:1,flexShrink:0}},l.fav?"⭐":"☆")
+          ),
+          el("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8}},
+            el("button",{onClick:()=>toggleZone(l.id),style:{fontFamily:"monospace",fontSize:10,padding:"4px 10px",borderRadius:100,background:zl.bg,color:zl.color,border:"none",cursor:"pointer",fontWeight:600}},zl.label),
+            el("div",{style:{display:"flex",gap:8,alignItems:"center"}},
+              l.rawPrice>0&&el("button",{onClick:()=>onCalc(l),style:{fontFamily:"monospace",fontSize:10,fontWeight:700,color:"#7048a0",background:"#f3eeff",border:"1px solid #d4c0f0",borderRadius:100,padding:"4px 10px",cursor:"pointer"}},"📊 Calc"),
+              l.url&&el("a",{href:l.url,target:"_blank",rel:"noreferrer",style:{fontFamily:"monospace",fontSize:10,fontWeight:700,color:C.coral,textDecoration:"none",padding:"4px 10px",border:`1px solid ${C.coralLt}`,borderRadius:100,background:"#fff0ec"}},"View ↗"),
+              el("button",{onClick:()=>remove(l.id),style:{fontFamily:"monospace",fontSize:10,color:"#c0b0b0",background:"none",border:"1px solid #f0e0e0",borderRadius:100,padding:"4px 10px",cursor:"pointer",fontFamily:"inherit"}},"Remove")
+            )
+          )
+        );
+      })
+    ),
+    listings.length>0&&el("div",{style:{marginTop:14,padding:"10px 14px",background:"linear-gradient(135deg,#fff8f5,#fff0f8)",border:`1.5px solid ${C.rule}`,borderRadius:12,fontSize:11,color:C.muted,fontFamily:"monospace",lineHeight:1.7}},
+      "💡 Tap 📊 Calc on any priced listing to run the mortgage calculator. Tap the Zone A pill to update status."
+    )
+  );
+}
+
+/* ── SEARCH ───────────────────────────────────────────── */
+function SearchListings(){
+  return el("div",null,
+    el("div",{style:{display:"flex",gap:11,alignItems:"flex-start",background:"linear-gradient(135deg,#fff4f0,#ffeef4)",border:`1.5px solid ${C.coralLt}`,borderRadius:14,padding:"12px 14px",marginBottom:14}},
+      el("span",{style:{fontSize:16,flexShrink:0}},"📍"),
+      el("div",{style:{fontSize:12,color:"#7a3030",lineHeight:1.6}},el("strong",null,"Always verify Zone A before an offer.")," Use the Zone Lookup in the Apply tab.")
+    ),
+    el("div",{style:{background:gDark,borderRadius:16,padding:"18px 16px",marginBottom:14,position:"relative",overflow:"hidden"}},
+      el("div",{style:{position:"absolute",inset:0,background:"radial-gradient(ellipse 80% 100% at 100% 100%,rgba(244,105,75,0.18) 0%,transparent 55%)",pointerEvents:"none"}}),
+      el("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,position:"relative"}},
+        el("div",{style:{fontFamily:"monospace",fontSize:9,letterSpacing:"0.14em",textTransform:"uppercase",color:"rgba(255,255,255,0.3)"}},"Search sources · $180k–$235k"),
+        el("button",{onClick:()=>SOURCES.forEach(s=>window.open(s.url,"_blank")),style:{fontFamily:"inherit",fontSize:10,fontWeight:700,background:grad,color:"#fff",border:"none",borderRadius:100,padding:"6px 12px",cursor:"pointer"}},"Open all ↗")
+      ),
+      el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,position:"relative"}},
+        SOURCES.map(s=>el("a",{key:s.url,href:s.url,target:"_blank",rel:"noreferrer",style:{textDecoration:"none"}},
+          el("div",{style:{fontFamily:"monospace",fontSize:9,letterSpacing:"0.12em",textTransform:"uppercase",color:"rgba(255,255,255,0.28)",marginBottom:3}},s.name),
+          el("div",{style:{fontSize:11,fontWeight:700,background:grad,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}},"Search →"),
+          el("div",{style:{fontSize:10,color:"rgba(255,255,255,0.28)",marginTop:2}},s.desc)
+        ))
+      )
+    ),
+    el("div",{style:{padding:"12px 14px",background:"linear-gradient(135deg,#fff8f5,#fff0f8)",border:`1.5px solid ${C.rule}`,borderRadius:12,fontSize:11,color:C.muted,fontFamily:"monospace",lineHeight:1.7}},
+      "⟳ Use search links daily — units at this price point move fast. Always verify Zone A before making an offer."
+    )
+  );
+}
+
+/* ── APPLY LINKS ──────────────────────────────────────── */
+function AppLinks(){
+  return el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}},
+    APP_LINKS.map(l=>el("a",{key:l.url,href:l.url,target:"_blank",rel:"noreferrer",style:{display:"flex",flexDirection:"column",gap:4,background:C.white,border:`1.5px solid ${C.rule}`,borderRadius:14,padding:"14px 12px",textDecoration:"none"}},
+      el("div",{style:{fontFamily:"monospace",fontSize:9,letterSpacing:"0.12em",textTransform:"uppercase",color:C.muted}},l.label),
+      el("div",{style:{fontWeight:700,fontSize:12,color:C.ink}},l.name),
+      el("div",{style:{fontSize:11,color:C.muted,lineHeight:1.4}},l.desc),
+      el("div",{style:{marginTop:"auto",paddingTop:8,fontSize:18,background:grad,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",alignSelf:"flex-end"}},"↗")
+    ))
+  );
+}
+
+/* ── MAIN APP ─────────────────────────────────────────── */
+function MainApp(){
+  const[tab,setTab]=useState("checklist");
+  const[calcListing,setCalcListing]=useState(null);
+  function handleCalc(listing){setCalcListing(listing);setTab("calc");}
+  const tabs=[{id:"checklist",label:"Checklist"},{id:"watch",label:"Watchlist"},{id:"calc",label:"Calculator"},{id:"search",label:"Search"},{id:"links",label:"Apply"}];
+  const sectionLabel={checklist:"Qualification checklist",watch:"My listing watchlist",calc:"Mortgage calculator",search:"Browse · Bronzeville & South Loop",links:"Apply & contact"};
+  const stats=[
+    {label:"Zone A Grant",value:"$40,000",sub:"101–120% AMI bracket"},
+    {label:"Target Price",value:"≤$230k",sub:"17.4% — within cap ✓"},
+    {label:"Est. Mortgage",value:"~$188k",sub:"≈$1,240/mo @ "+RATE_30+"%"},
+    {label:"Your 1% Min.",value:"$2,300",sub:"Required personal funds"},
+  ];
+  return el("div",{style:{minHeight:"100vh",background:C.cream,animation:"fadeUp 0.4s ease both"}},
+    el("div",{style:{background:gDark,position:"relative",overflow:"hidden"}},
+      el("div",{style:{position:"absolute",inset:0,background:"radial-gradient(ellipse 80% 60% at 80% 120%,rgba(244,105,75,0.32) 0%,transparent 55%),radial-gradient(ellipse 60% 80% at 10% 130%,rgba(180,60,100,0.22) 0%,transparent 50%)",pointerEvents:"none"}}),
+      el("div",{style:{position:"absolute",inset:0,backgroundImage:"linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px)",backgroundSize:"36px 36px",pointerEvents:"none"}}),
+      el("div",{style:{position:"relative",padding:"28px 18px 16px"}},
+        el("div",{style:{fontFamily:"monospace",fontSize:9,letterSpacing:"0.18em",textTransform:"uppercase",color:C.peach,marginBottom:8,opacity:0.8}},"City of Chicago · HomeGrown 2026"),
+        el("div",{style:{fontFamily:"Georgia,serif",fontSize:26,lineHeight:1.1,color:"#fff",marginBottom:14}},
+          "Your path to ",el("span",{style:{fontStyle:"italic",background:grad,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}},"owning in Chicago")
+        ),
+        el("div",{style:{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:14,padding:14,position:"relative",overflow:"hidden"}},
+          el("div",{style:{position:"absolute",inset:0,background:"radial-gradient(ellipse 80% 80% at 90% 110%,rgba(244,105,75,0.18) 0%,transparent 55%)",pointerEvents:"none"}}),
+          el("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,position:"relative"}},
+            stats.map(s=>el("div",{key:s.label},
+              el("div",{style:{fontFamily:"monospace",fontSize:8,letterSpacing:"0.12em",textTransform:"uppercase",color:"rgba(255,255,255,0.3)",marginBottom:4}},s.label),
+              el("div",{style:{fontFamily:"Georgia,serif",fontSize:17,fontStyle:"italic",background:grad,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",lineHeight:1.1}},s.value),
+              el("div",{style:{fontSize:10,color:"rgba(255,255,255,0.28)",marginTop:2}},s.sub)
+            ))
+          )
+        )
+      ),
+      el("div",{style:{display:"flex",borderTop:"1px solid rgba(255,255,255,0.08)",overflowX:"auto",WebkitOverflowScrolling:"touch"}},
+        tabs.map(t=>el("button",{key:t.id,onClick:()=>setTab(t.id),style:{flex:"0 0 auto",padding:"12px 13px",background:"none",border:"none",cursor:"pointer",fontFamily:"inherit",fontSize:11,fontWeight:700,color:tab===t.id?C.peach:"rgba(255,255,255,0.35)",borderBottom:tab===t.id?"2px solid "+C.coral:"2px solid transparent",whiteSpace:"nowrap",transition:"color 0.2s"}},t.label))
+      )
+    ),
+    el("div",{style:{padding:"20px 16px 60px"}},
+      el("div",{style:{fontFamily:"monospace",fontSize:9,letterSpacing:"0.17em",textTransform:"uppercase",color:C.muted,marginBottom:14,display:"flex",alignItems:"center",gap:7}},
+        el("span",{style:{width:5,height:5,borderRadius:"50%",background:grad,display:"inline-block"}}),
+        sectionLabel[tab]
+      ),
+      tab==="checklist"&&el(Checklist),
+      tab==="watch"&&el(MyListings,{onCalc:handleCalc}),
+      tab==="calc"&&el(Calculator,{fromListing:calcListing}),
+      tab==="search"&&el(SearchListings),
+      tab==="links"&&el(AppLinks)
+    ),
+    el("div",{style:{background:gDark,textAlign:"center",padding:"20px 16px",fontFamily:"monospace",fontSize:10,color:"rgba(255,255,255,0.22)",letterSpacing:"0.05em"}},
+      el("a",{href:"https://www.chicago.gov/homegrown",target:"_blank",rel:"noreferrer",style:{color:C.peach,textDecoration:"none"}},"chicago.gov/homegrown"),
+      " · ",el("a",{href:"tel:3127443653",style:{color:C.peach,textDecoration:"none"}},"312-744-3653"),
+      " · TRP: ",el("a",{href:"tel:3126661323",style:{color:C.peach,textDecoration:"none"}},"312-666-1323")
+    )
+  );
+}
+
+/* ── ROOT ─────────────────────────────────────────────── */
+function Root(){
+  const[unlocked,setUnlocked]=useState(false);
+  useEffect(()=>{try{if(sessionStorage.getItem("hg_unlocked")==="1")setUnlocked(true)}catch{}});
+  function handleUnlock(){try{sessionStorage.setItem("hg_unlocked","1")}catch{};setUnlocked(true);}
+  return unlocked?el(MainApp):el(LockScreen,{onUnlock:handleUnlock});
+}
+ReactDOM.createRoot(document.getElementById("root")).render(el(Root));
 </script>
 </body>
 </html>
